@@ -2,3 +2,20 @@
 use v6.d;
 use lib 'lib';
 use meek;
+use WWW::OpenAI;
+use Env::Dotenv :ALL;
+
+dotenv_load();
+
+for %*ENV.kv -> $key, $value {
+    "$key: $value".say;
+}
+
+my %dotenv = dotenv_values();
+
+say %dotenv{"MY_SECRET_INFO"};
+
+for dotenv_values().kv -> $key, $value {
+    "$key: $value".say;
+}
+openai-playground('Where is Roger Rabbit?', max-tokens => 64);

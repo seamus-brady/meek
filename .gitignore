@@ -7,3 +7,6 @@ lib/.precomp
 
 # ide
 .idea/
+
+# env vars
+.env
