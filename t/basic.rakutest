@@ -1,0 +1,5 @@
+use v6.d;
+use meek;
+use Test;
+
+done-testing;
