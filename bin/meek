@@ -5,8 +5,21 @@ use warnings FATAL => 'all';
 use utf8;
 use open qw(:std :utf8);
 no feature qw(indirect);
-use feature qw(signatures);
-no warnings qw(experimental::signatures);
+use Dotenv;
+use OpenAI::API;
 
+my $openai = OpenAI::API->new();    # uses OPENAI_API_KEY environment variable
 
-say("hello world!");
+my $res = $openai->chat(
+  messages => [
+    { "role" => "system",    "content" => "You are a helpful assistant." },
+    { "role" => "user",      "content" => "How can I access OpenAI's APIs in Perl?" },
+    { "role" => "assistant", "content" => "You can use the OpenAI::API module." },
+    { "role" => "user",      "content" => "Where can I find this module?" },
+  ],
+  max_tokens  => 100,
+  temperature => 0,
+);
+
+my $message = $res->{choices}[0]{message};    # or simply: my $message = "$res";
+say $message->{content};

@@ -41,3 +41,6 @@ meek.iml
 
 # carton
 /local
+
+# env vars
+.env
