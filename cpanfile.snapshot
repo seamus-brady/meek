@@ -131,6 +131,20 @@ DISTRIBUTIONS
       ExtUtils::MakeMaker 0
       HTTP::Date 0
       perl 5.006
+  File-Slurper-0.014
+    pathname: L/LE/LEONT/File-Slurper-0.014.tar.gz
+    provides:
+      File::Slurper 0.014
+    requirements:
+      Carp 0
+      Encode 2.11
+      Exporter 5.57
+      ExtUtils::MakeMaker 0
+      PerlIO::encoding 0
+      constant 0
+      perl 5.008
+      strict 0
+      warnings 0
   Future-0.50
     pathname: P/PE/PEVANS/Future-0.50.tar.gz
     provides:
@@ -341,6 +355,14 @@ DISTRIBUTIONS
       Mozilla::CA 0
       Net::SSLeay 1.46
       Scalar::Util 0
+  JSON-4.10
+    pathname: I/IS/ISHIGAKI/JSON-4.10.tar.gz
+    provides:
+      JSON 4.10
+      JSON::Backend::PP 4.10
+    requirements:
+      ExtUtils::MakeMaker 0
+      Test::More 0
   JSON-MaybeXS-1.004005
     pathname: E/ET/ETHER/JSON-MaybeXS-1.004005.tar.gz
     provides:
@@ -379,6 +401,33 @@ DISTRIBUTIONS
       base 0
       perl 5.008001
       strict 0
+  Math-Expression-Evaluator-v0.3.2
+    pathname: M/MO/MORITZ/Math-Expression-Evaluator-v0.3.2.tar.gz
+    provides:
+      Math::Expression::Evaluator v0.3.2
+      Math::Expression::Evaluator::Lexer undef
+      Math::Expression::Evaluator::Optimizer undef
+      Math::Expression::Evaluator::Parser undef
+      Math::Expression::Evaluator::Util undef
+    requirements:
+      Carp 0
+      Data::Dumper 0
+      Math::Trig 0
+      perl 5.006001
+  Modern-Perl-1.20230106
+    pathname: C/CH/CHROMATIC/Modern-Perl-1.20230106.tar.gz
+    provides:
+      Modern::Perl 1.20230106
+      odern::Perl 1.20230106
+    requirements:
+      ExtUtils::MakeMaker 0
+      IO::File 0
+      IO::Handle 0
+      feature 0
+      mro 0
+      perl 5.010
+      strict 0
+      warnings 0
   Module-Build-0.4234
     pathname: L/LE/LEONT/Module-Build-0.4234.tar.gz
     provides:
@@ -580,6 +629,31 @@ DISTRIBUTIONS
       perl 5.008001
       strict 0
       warnings 0
+  Path-Class-0.37
+    pathname: K/KW/KWILLIAMS/Path-Class-0.37.tar.gz
+    provides:
+      Path::Class 0.37
+      Path::Class::Dir 0.37
+      Path::Class::Entity 0.37
+      Path::Class::File 0.37
+    requirements:
+      Carp 0
+      Cwd 0
+      Exporter 0
+      ExtUtils::MakeMaker 6.30
+      File::Copy 0
+      File::Path 0
+      File::Spec 3.26
+      File::Temp 0
+      File::stat 0
+      IO::Dir 0
+      IO::File 0
+      Module::Build 0.3601
+      Perl::OSType 0
+      Scalar::Util 0
+      overload 0
+      parent 0
+      strict 0
   Role-Tiny-2.002004
     pathname: H/HA/HAARG/Role-Tiny-2.002004.tar.gz
     provides:

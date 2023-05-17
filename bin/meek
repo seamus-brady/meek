@@ -1,24 +1,186 @@
 #!/usr/bin/perl
 use strict;
-use v5.36;
+use Modern::Perl '2023';
 use warnings FATAL => 'all';
 use utf8;
 use open qw(:std :utf8);
 no feature qw(indirect);
 use OpenAI::API;
+use LWP::Simple;
+use JSON;
+use Math::Expression::Evaluator;
+use Path::Class;
+use Term::ReadLine;
 
-my $openai = OpenAI::API->new();    # uses OPENAI_API_KEY environment variable
+sub openai_message(){
+  my $openapi_key =  $ENV{'OPENAI_API_KEY'};
 
-my $res = $openai->chat(
-  messages => [
-    { "role" => "system",    "content" => "You are a helpful assistant." },
-    { "role" => "user",      "content" => "How can I access OpenAI's APIs in Perl?" },
-    { "role" => "assistant", "content" => "You can use the OpenAI::API module." },
-    { "role" => "user",      "content" => "Where can I find this module?" },
-  ],
-  max_tokens  => 100,
-  temperature => 0,
+  my $openai = OpenAI::API->new(api_key => $openapi_key );
+
+  my $res = $openai->chat(
+    messages => [
+      { "role" => "system",    "content" => "You are a helpful assistant." },
+      { "role" => "user",      "content" => "How can I access OpenAI's APIs in Perl?" },
+      { "role" => "assistant", "content" => "You can use the OpenAI::API module." },
+      { "role" => "user",      "content" => "What is 42?" },
+    ],
+    max_tokens  => 100,
+    temperature => 0.7,
+  );
+
+  my $message = $res->{choices}[0]{message};    # or simply: my $message = "$res";
+  say $message->{content};
+}
+
+# openai_message();
+
+
+sub googleSearch($question) {
+  my $api_key = $ENV{'SERPAPI_API_KEY'};
+  my $url = "https://serpapi.com/search?api_key=$api_key&q=$question";
+
+  my $response = get($url);
+  die "Error retrieving data" unless defined $response;
+
+  my $json = decode_json($response);
+
+  my $answer = $json->{'answer_box'}->{'answer'}
+    || $json->{'answer_box'}->{'snippet'}
+    || $json->{'organic_results'}->[0]->{'snippet'};
+
+  return $answer;
+}
+
+
+
+# Example usage
+# my $question = "What is the capital city of Ireland?";
+# my $answer = googleSearch($question);
+# print "Answer: $answer\n";
+
+
+my %tools = (
+  'search' => {
+    'description' => 'a search engine. useful for when you need to answer questions about current events. input should be a search query.',
+    'execute' => \&googleSearch,
+  },
+  'calculator' => {
+    'description' => 'Useful for getting the result of a math expression. The input to this tool should be a valid mathematical expression that could be executed by a simple calculator.',
+    'execute' => sub {
+      my ($input) = @_;
+      return Math::Expression::Evaluator->new()->parse($input)->val();
+    },
+  },
 );
 
-my $message = $res->{choices}[0]{message};    # or simply: my $message = "$res";
-say $message->{content};
+# # Example usage
+# my $tool = 'search';
+# my $input = 'whats is a platypus?';
+# my $result = $tools{$tool}->{'execute'}->($input);
+# print "Result: $result\n";
+
+
+my $script_path = File::Spec->rel2abs(__FILE__);
+my ($volume, $script_directory, $file) = File::Spec->splitpath( $script_path );
+my $prompt_file_path = File::Spec->catfile($script_directory, "prompt.txt");
+my $promptTemplate = file($prompt_file_path)->slurp;
+my $merge_file_path = File::Spec->catfile($script_directory, "merge.txt");
+my $mergeTemplate = file($merge_file_path)->slurp;
+
+# Example usage
+# print "Prompt Template:\n$promptTemplate\n";
+# print "Merge Template:\n$mergeTemplate\n";
+
+sub completePrompt {
+  my ($prompt) = @_;
+
+  my $url = "https://api.openai.com/v1/completions";
+  my $api_key = $ENV{'OPENAI_API_KEY'};
+
+  my $ua = LWP::UserAgent->new;
+  my $headers = [
+    "Content-Type" => "application/json",
+    "Authorization" => "Bearer $api_key",
+  ];
+  my $data = {
+    model => "text-davinci-003",
+    prompt => $prompt,
+    max_tokens => 256,
+    temperature => 0.7,
+    stream => JSON::false,
+    stop => ["Observation:"],
+  };
+  my $request = HTTP::Request->new('POST', $url, $headers, encode_json($data));
+  my $response = $ua->request($request);
+
+  die "Error: " . $response->status_line unless $response->is_success;
+
+  my $decoded_response = decode_json($response->decoded_content);
+  my $text = $decoded_response->{'choices'}[0]{'text'};
+
+  print "\x1b[91m$prompt\x1b[0m\n";
+  print "\x1b[92m$text\x1b[0m\n";
+
+  return $text;
+}
+
+# Example usage
+# my $prompt = "What is a platypus?";
+# my $result = completePrompt($prompt);
+
+sub trim {
+  my ($string) = @_;
+  $string =~ s/^\s+|\s+$//g;
+  return $string;
+}
+
+sub answerQuestion {
+  my ($question) = @_;
+
+  # Construct the prompt, replacing placeholders with question and tools information
+  my $prompt = $promptTemplate;
+  $prompt =~ s/\$\{question\}/$question/g;
+  $prompt =~ s/\$\{tools\}/join("\n", map {"$_: $tools{$_}->{'description'}"} keys %tools)/e;
+
+  # Allow the model to iterate until a final answer is found
+  while (1) {
+    my $response = completePrompt($prompt);
+
+    # Add the response to the prompt
+    $prompt .= $response;
+
+    my ($action) = $response =~ /Action: (.*)/;
+    if ($action) {
+      # Execute the action specified by the model
+      my ($actionInput) = $response =~ /Action Input: "?(.*)"?/;
+      my $result = $tools{trim($action)}->{'execute'}->($actionInput);
+      $prompt .= "Observation: $result\n";
+    } else {
+      my ($finalAnswer) = $response =~ /Final Answer: (.*)/;
+      return $finalAnswer;
+    }
+  }
+}
+
+sub mergeHistory {
+  my ($question, $history) = @_;
+
+  my $prompt = $mergeTemplate;
+  $prompt =~ s/\$\{question\}/$question/g;
+  $prompt =~ s/\$\{history\}/$history/g;
+
+  return completePrompt($prompt);
+}
+
+my $history = "";
+my $term = Term::ReadLine->new("How can I help? ");
+
+while (1) {
+  my $question = $term->readline("How can I help? ");
+  if (length($history) > 0) {
+    $question = mergeHistory($question, $history);
+  }
+  my $answer = answerQuestion($question);
+  print "$answer\n";
+  $history .= "Q:$question\nA:$answer\n";
+}

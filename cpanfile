@@ -1,2 +1,8 @@
 requires 'perl', '5.36.1';
 requires 'OpenAI::API', '0.37';
+requires 'Modern::Perl', '1.20230106';
+requires 'LWP::Simple', '6.70';
+requires 'JSON', '4.10';
+requires 'Math::Expression::Evaluator', '0.3.2';
+requires 'Path::Class', '0.37';
+requires 'Term::ReadLine', '1.17';

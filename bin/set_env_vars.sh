@@ -10,7 +10,6 @@ cd ..
 pwd
 
 # load the .env file
-
 source .env
 
 echo 'Done.'
