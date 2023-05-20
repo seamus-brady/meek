@@ -1,0 +1,84 @@
+# Copyright (c) 2023. seamus@meek.ai, Corvideon Limited.
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+
+package Tools::BingSearch;
+
+# pragmas
+use strict;
+use Modern::Perl '2023';
+use warnings FATAL => 'all';
+use utf8;
+use open qw(:std :utf8);
+no feature qw(indirect);
+
+# imports
+use Moose;
+use MooseX::ClassAttribute;
+use namespace::autoclean;
+use LWP::Simple;
+use JSON;
+use Try::Tiny;
+use Tools::BingSearchResults;
+use Tools::BingSearchConstants;
+
+=head1 NAME
+
+Tools::BingSearch - represents a tool that can search Bing.
+
+=cut
+
+has 'api_key' => (
+  is       => 'rw',
+  isa      => 'Str',
+  required => 0
+);
+
+sub BUILD {
+  my $self = shift;
+  if(!$self->api_key()){
+    $self->api_key($ENV{'BING_SEARCH_KEY'});
+  }
+}
+
+sub search($self, $question) {
+  my $error_response = "Sorry there was a problem with your search. Please try again.";
+  try {
+    my $ua = LWP::UserAgent->new;
+    my $request_data = $self->_get_request($question);
+    my $response = $ua->request($request_data);
+    my $search_results = Tools::BingSearchResults->get_json($response->content);
+    print($search_results->webPages->{value}[0]->{snippet});
+    return $search_results->webPages->{value}[0]->{snippet}
+  } catch {
+    my $e = $_;
+    say $e;
+    return $error_response;
+  };
+}
+
+sub _get_url($self, $term) {
+  my $uri = Tools::BingSearchConstants->URI;
+  my $path = Tools::BingSearchConstants->PATH;
+  $uri = $uri . $path . "?q=" . URI::Escape::uri_escape($term);
+  return $uri;
+}
+
+sub _get_request($self, $question) {
+  my $uri = $self->_get_url($question);
+  my $request = HTTP::Request->new(GET => $uri);
+  my $accessKey = $self->api_key;
+  $request->header('Ocp-Apim-Subscription-Key' => $accessKey);
+  return $request;
+}
+
+__PACKAGE__->meta->make_immutable;
+1;
