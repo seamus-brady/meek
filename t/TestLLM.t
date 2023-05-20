@@ -10,16 +10,14 @@ no feature qw(indirect);
 
 # imports
 use Test::More;
+use LLM::OpenAICompletion;
 
-use LLM;
-
-# Test the LLM class
-subtest 'LLM Class Tests' => sub {
+subtest 'LLM::OpenAICompletion Class Tests' => sub {
   plan tests => 3;
-  my $llm = LLM->new();
-  isa_ok($llm, 'LLM', 'Object is an instance of LLM');
+  my $llm = LLM::OpenAICompletion->new();
+  isa_ok($llm, 'LLM::OpenAICompletion', 'Object is an instance of LLM::OpenAICompletion');
   ok($llm->api_key, 'API Key attribute is not null');
-  ok($llm->completion_response('hello!'), 'LLM completion OK');
+  ok($llm->completion_response('hello!'), 'LLM::OpenAICompletion completion OK');
 };
 
 done_testing();

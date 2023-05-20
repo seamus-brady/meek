@@ -14,45 +14,12 @@ use Path::Class;
 use Term::ReadLine;
 use LWP::Simple;
 use JSON;
-use LLM;
-
-sub openai_message(){
-  my $openapi_key =  $ENV{'OPENAI_API_KEY'};
-
-  my $openai = OpenAI::API->new(api_key => $openapi_key );
-
-  my $res = $openai->chat(
-    messages => [
-      { "role" => "system",    "content" => "You are a helpful assistant." },
-      { "role" => "user",      "content" => "How can I access OpenAI's APIs in Perl?" },
-      { "role" => "assistant", "content" => "You can use the OpenAI::API module." },
-      { "role" => "user",      "content" => "What is 42?" },
-    ],
-    max_tokens  => 100,
-    temperature => 0.7,
-  );
-
-  my $message = $res->{choices}[0]{message};    # or simply: my $message = "$res";
-  say $message->{content};
-}
-
-# openai_message();
+use LLM::OpenAICompletion;
+use Tools::GoogleSearch;
 
 
 sub googleSearch($question) {
-  my $api_key = $ENV{'SERPAPI_API_KEY'};
-  my $url = "https://serpapi.com/search?api_key=$api_key&q=$question";
-
-  my $response = get($url);
-  die "Error retrieving data" unless defined $response;
-
-  my $json = decode_json($response);
-
-  my $answer = $json->{'answer_box'}->{'answer'}
-    || $json->{'answer_box'}->{'snippet'}
-    || $json->{'organic_results'}->[0]->{'snippet'};
-
-  return $answer;
+  return Tools::GoogleSearch->new()->search($question);
 }
 
 
@@ -96,7 +63,7 @@ my $mergeTemplate = file($merge_file_path)->slurp;
 # print "Merge Template:\n$mergeTemplate\n";
 
 sub completePrompt( $prompt ) {
-  my $llm = LLM->new();
+  my $llm = LLM::OpenAICompletion->new();
   return $llm->completion_response($prompt);
 }
 

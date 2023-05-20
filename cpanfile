@@ -7,3 +7,5 @@ requires 'Math::Expression::Evaluator', '0.3.2';
 requires 'Path::Class', '0.37';
 requires 'Term::ReadLine', '1.17';
 requires 'Moose', '2.2203';
+requires 'Try::Tiny', '0.31';
+requires 'MooseX-ClassAttribute', '0.29';
