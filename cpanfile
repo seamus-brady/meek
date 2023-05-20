@@ -6,3 +6,4 @@ requires 'JSON', '4.10';
 requires 'Math::Expression::Evaluator', '0.3.2';
 requires 'Path::Class', '0.37';
 requires 'Term::ReadLine', '1.17';
+requires 'Moose', '2.2203';

@@ -1,16 +1,20 @@
 #!/usr/bin/perl
+
+# pragmas
 use strict;
 use Modern::Perl '2023';
 use warnings FATAL => 'all';
 use utf8;
 use open qw(:std :utf8);
 no feature qw(indirect);
-use OpenAI::API;
-use LWP::Simple;
-use JSON;
+
+# imports
 use Math::Expression::Evaluator;
 use Path::Class;
 use Term::ReadLine;
+use LWP::Simple;
+use JSON;
+use LLM;
 
 sub openai_message(){
   my $openapi_key =  $ENV{'OPENAI_API_KEY'};
@@ -91,37 +95,9 @@ my $mergeTemplate = file($merge_file_path)->slurp;
 # print "Prompt Template:\n$promptTemplate\n";
 # print "Merge Template:\n$mergeTemplate\n";
 
-sub completePrompt {
-  my ($prompt) = @_;
-
-  my $url = "https://api.openai.com/v1/completions";
-  my $api_key = $ENV{'OPENAI_API_KEY'};
-
-  my $ua = LWP::UserAgent->new;
-  my $headers = [
-    "Content-Type" => "application/json",
-    "Authorization" => "Bearer $api_key",
-  ];
-  my $data = {
-    model => "text-davinci-003",
-    prompt => $prompt,
-    max_tokens => 256,
-    temperature => 0.7,
-    stream => JSON::false,
-    stop => ["Observation:"],
-  };
-  my $request = HTTP::Request->new('POST', $url, $headers, encode_json($data));
-  my $response = $ua->request($request);
-
-  die "Error: " . $response->status_line unless $response->is_success;
-
-  my $decoded_response = decode_json($response->decoded_content);
-  my $text = $decoded_response->{'choices'}[0]{'text'};
-
-  print "\x1b[91m$prompt\x1b[0m\n";
-  print "\x1b[92m$text\x1b[0m\n";
-
-  return $text;
+sub completePrompt( $prompt ) {
+  my $llm = LLM->new();
+  return $llm->completion_response($prompt);
 }
 
 # Example usage
