@@ -5,12 +5,19 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-# THE SOFTWARE.
+#  Copyright (c) 2023. seamus@meek.ai, Corvideon Limited.
+#  The above copyright notice and this permission notice shall be included in
+#  all copies or substantial portions of the Software.
+#
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#  THE SOFTWARE.
 
-package Tools::BingSearch;
+package Tools::Search::BingSearch;
 
 # pragmas
 use strict;
@@ -27,8 +34,9 @@ use namespace::autoclean;
 use LWP::Simple;
 use JSON;
 use Try::Tiny;
-use Tools::BingSearchResults;
-use Tools::BingSearchConstants;
+use MooseX::ClassAttribute;
+use Tools::Search::BingSearchResults;
+use Util::ConfigUtil;
 
 =head1 NAME
 
@@ -44,30 +52,37 @@ has 'api_key' => (
 
 sub BUILD {
   my $self = shift;
-  if(!$self->api_key()){
+  if (!$self->api_key()) {
     $self->api_key($ENV{'BING_SEARCH_KEY'});
   }
 }
 
+sub search_sub($class, $question) {
+  return sub {
+    Tools::Search::BingSearch->new()->search($question);
+  }
+}
+
 sub search($self, $question) {
-  my $error_response = "Sorry there was a problem with your search. Please try again.";
+  my $error_response = Util::ConfigUtil->get('BING_SEARCH_TOOL', 'NO_RESULTS_MESSAGE');
   try {
     my $ua = LWP::UserAgent->new;
     my $request_data = $self->_get_request($question);
     my $response = $ua->request($request_data);
-    my $search_results = Tools::BingSearchResults->get_json($response->content);
+    my $search_results = Tools::Search::BingSearchResults->get_json($response->content);
     print($search_results->webPages->{value}[0]->{snippet});
     return $search_results->webPages->{value}[0]->{snippet}
-  } catch {
+  }
+  catch {
     my $e = $_;
-    say $e;
+    # say $e;
     return $error_response;
   };
 }
 
 sub _get_url($self, $term) {
-  my $uri = Tools::BingSearchConstants->URI;
-  my $path = Tools::BingSearchConstants->PATH;
+  my $uri = Util::ConfigUtil->get('BING_SEARCH_TOOL', 'URI');
+  my $path = Util::ConfigUtil->get('BING_SEARCH_TOOL', 'PATH');
   $uri = $uri . $path . "?q=" . URI::Escape::uri_escape($term);
   return $uri;
 }
@@ -81,4 +96,5 @@ sub _get_request($self, $question) {
 }
 
 __PACKAGE__->meta->make_immutable;
+
 1;

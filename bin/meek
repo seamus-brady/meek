@@ -27,13 +27,12 @@ use Term::ReadLine;
 use LWP::Simple;
 use JSON;
 use LLM::OpenAICompletion;
-use Tools::BingSearch;
+use Tools::Search::BingSearch;
 
 
 sub googleSearch($question) {
-  return Tools::BingSearch->new()->search($question);
+  return Tools::Search::BingSearch->new()->search($question);
 }
-
 
 
 # Example usage
@@ -43,13 +42,13 @@ sub googleSearch($question) {
 
 
 my %tools = (
-  'search' => {
+  'search'     => {
     'description' => 'a search engine. useful for when you need to answer questions about current events. input should be a search query.',
-    'execute' => \&googleSearch,
+    'execute'     => \&googleSearch,
   },
   'calculator' => {
     'description' => 'Useful for getting the result of a math expression. The input to this tool should be a valid mathematical expression that could be executed by a simple calculator.',
-    'execute' => sub {
+    'execute'     => sub {
       my ($input) = @_;
       return Math::Expression::Evaluator->new()->parse($input)->val();
     },
@@ -64,7 +63,7 @@ my %tools = (
 
 
 my $script_path = File::Spec->rel2abs(__FILE__);
-my ($volume, $script_directory, $file) = File::Spec->splitpath( $script_path );
+my ($volume, $script_directory, $file) = File::Spec->splitpath($script_path);
 my $prompt_file_path = File::Spec->catfile($script_directory, "prompt.txt");
 my $promptTemplate = file($prompt_file_path)->slurp;
 my $merge_file_path = File::Spec->catfile($script_directory, "merge.txt");
@@ -74,7 +73,7 @@ my $mergeTemplate = file($merge_file_path)->slurp;
 # print "Prompt Template:\n$promptTemplate\n";
 # print "Merge Template:\n$mergeTemplate\n";
 
-sub completePrompt( $prompt ) {
+sub completePrompt($prompt) {
   my $llm = LLM::OpenAICompletion->new();
   return $llm->completion_response($prompt);
 }
@@ -110,7 +109,8 @@ sub answerQuestion {
       my ($actionInput) = $response =~ /Action Input: "?(.*)"?/;
       my $result = $tools{trim($action)}->{'execute'}->($actionInput);
       $prompt .= "Observation: $result\n";
-    } else {
+    }
+    else {
       my ($finalAnswer) = $response =~ /Final Answer: (.*)/;
       return $finalAnswer;
     }

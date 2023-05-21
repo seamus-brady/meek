@@ -20,12 +20,12 @@ no feature qw(indirect);
 
 # imports
 use Test::More;
-use Tools::BingSearch;
+use Tools::Search::BingSearch;
 
-subtest 'Tools::BingSearch Class Tests' => sub {
+subtest 'Tools::Search::BingSearch Class Tests' => sub {
   plan tests => 3;
-  my $google = Tools::BingSearch->new();
-  isa_ok($google, 'Tools::BingSearch', 'Object is an instance of Tools::SerpAPIGoogle');
+  my $google = Tools::Search::BingSearch->new();
+  isa_ok($google, 'Tools::Search::BingSearch', 'Object is an instance of Tools::SerpAPIGoogle');
   ok($google->api_key, 'API Key attribute is not null');
   ok($google->search('hello!'), 'Tools::SerpAPIGoogle search OK');
 };

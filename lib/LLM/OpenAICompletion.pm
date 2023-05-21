@@ -27,7 +27,7 @@ use LWP::Simple;
 use JSON;
 use Try::Tiny;
 use MooseX::ClassAttribute;
-use LLM::OpenAIConstants;
+use Util::ConfigUtil;
 
 =head1 NAME
 
@@ -43,7 +43,7 @@ has 'api_key' => (
 
 sub BUILD {
   my $self = shift;
-  if(!$self->api_key()){
+  if (!$self->api_key()) {
     $self->api_key($ENV{'OPENAI_API_KEY'});
   }
 }
@@ -54,12 +54,12 @@ Takes a prompt and returns a completion response.
 
 =cut
 
-sub completion_response( $self, $prompt ){
+sub completion_response($self, $prompt) {
   # get api key
   my $api_key = $self->api_key;
 
   # set up htto request
-  my $url = LLM::OpenAIConstants->OPENAI_COMPLETION_URL;
+  my $url = Util::ConfigUtil->get('OPENAI', 'OPENAI_COMPLETION_URL');
   my $ua = LWP::UserAgent->new;
   my $headers = $self->_get_headers($api_key);
   my $data = $self->_get_request_content($prompt);
@@ -68,34 +68,36 @@ sub completion_response( $self, $prompt ){
   # call api
   my $response = $ua->request($request);
 
-  if($response->is_success){
+  if ($response->is_success) {
     my $decoded_response = decode_json($response->decoded_content);
     my $text = $decoded_response->{'choices'}[0]{'text'};
     print "\x1b[91m$prompt\x1b[0m\n";
     print "\x1b[92m$text\x1b[0m\n";
     return $text;
-  } else {
+  }
+  else {
     return "Sorry there was a problem with your request. Please try again.";
   }
 }
 
 sub _get_headers($self, $api_key) {
   return [
-    "Content-Type" => "application/json",
+    "Content-Type"  => "application/json",
     "Authorization" => "Bearer $api_key",
   ];
 }
 
 sub _get_request_content($self, $prompt) {
   return {
-    model => LLM::OpenAIConstants->OPENAI_COMPLETION_MODEL,
-    prompt => $prompt,
-    max_tokens => LLM::OpenAIConstants->OPENAI_COMPLETION_MAX_TOKENS,
-    temperature => LLM::OpenAIConstants->OPENAI_COMPLETION_TEMP,
-    stream => JSON::false,
-    stop => "Observation:",
+    model       => Util::ConfigUtil->get('OPENAI', 'OPENAI_COMPLETION_MODEL'),
+    prompt      => $prompt,
+    max_tokens  => Util::ConfigUtil->get('OPENAI', 'OPENAI_COMPLETION_MAX_TOKENS'),
+    temperature => Util::ConfigUtil->get('OPENAI', 'OPENAI_COMPLETION_TEMP'),
+    stream      => JSON::false,
+    stop        => "Observation:",
   };
 }
 
 __PACKAGE__->meta->make_immutable;
+
 1;

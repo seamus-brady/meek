@@ -9,3 +9,5 @@ requires 'Term::ReadLine', '1.17';
 requires 'Moose', '2.2203';
 requires 'Try::Tiny', '0.31';
 requires 'MooseX-ClassAttribute', '0.29';
+requires 'Config::Tiny', '2.29';
+requires 'Scalar::Util', '1.63';
