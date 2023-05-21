@@ -1,7 +1,4 @@
 Answer the following questions as best you can.
-You must think about things step by step.
-You must be transparent and explainable, so that users can understand how you arrived at your decisions and recommendations.
-Br concise.
 You have access to the following tools:
 
 ${tools}

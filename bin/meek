@@ -21,46 +21,42 @@ use open qw(:std :utf8);
 no feature qw(indirect);
 
 # imports
-use Math::Expression::Evaluator;
 use Path::Class;
 use Term::ReadLine;
-use LWP::Simple;
-use JSON;
+use Try::Tiny;
 use LLM::OpenAICompletion;
 use Tools::Search::BingSearch;
+use Tools::Calculator;
 
+sub searchTool($input) {
+  return Tools::Search::BingSearch->new()->search($input);
+}
 
-sub googleSearch($question) {
-  return Tools::Search::BingSearch->new()->search($question);
+sub calcTool($input) {
+  return Tools::Calculator->calculate($input);
+}
+
+sub tool_config {
+  my $input = shift;
+  my %tools = (
+    'search'     => {
+      'description' => qq(
+      A search engine. useful for when you need to answer questions about current events.
+      Input should be a search query.'),
+      'execute'     => \&searchTool,
+    },
+    'calculator' => {
+      'description' => qq(
+      Useful for getting the result of a math expression.
+      The input to this tool should be a valid mathematical expression that could be executed by a simple calculator.),
+      'execute'     => \&calcTool,
+    },
+  );
+  return %tools;
 }
 
 
-# Example usage
-# my $question = "What is the capital city of Ireland?";
-# my $answer = googleSearch($question);
-# print "Answer: $answer\n";
-
-
-my %tools = (
-  'search'     => {
-    'description' => 'a search engine. useful for when you need to answer questions about current events. input should be a search query.',
-    'execute'     => \&googleSearch,
-  },
-  'calculator' => {
-    'description' => 'Useful for getting the result of a math expression. The input to this tool should be a valid mathematical expression that could be executed by a simple calculator.',
-    'execute'     => sub {
-      my ($input) = @_;
-      return Math::Expression::Evaluator->new()->parse($input)->val();
-    },
-  },
-);
-
-# # Example usage
-# my $tool = 'search';
-# my $input = 'whats is a platypus?';
-# my $result = $tools{$tool}->{'execute'}->($input);
-# print "Result: $result\n";
-
+my %tools = tool_config();
 
 my $script_path = File::Spec->rel2abs(__FILE__);
 my ($volume, $script_directory, $file) = File::Spec->splitpath($script_path);
@@ -69,18 +65,12 @@ my $promptTemplate = file($prompt_file_path)->slurp;
 my $merge_file_path = File::Spec->catfile($script_directory, "merge.txt");
 my $mergeTemplate = file($merge_file_path)->slurp;
 
-# Example usage
-# print "Prompt Template:\n$promptTemplate\n";
-# print "Merge Template:\n$mergeTemplate\n";
 
 sub completePrompt($prompt) {
   my $llm = LLM::OpenAICompletion->new();
   return $llm->completion_response($prompt);
 }
 
-# Example usage
-# my $prompt = "What is a platypus?";
-# my $result = completePrompt($prompt);
 
 sub trim {
   my ($string) = @_;
@@ -135,7 +125,9 @@ while (1) {
   if (length($history) > 0) {
     $question = mergeHistory($question, $history);
   }
-  my $answer = answerQuestion($question);
-  print "$answer\n";
-  $history .= "Q:$question\nA:$answer\n";
+  try {
+    my $answer = answerQuestion($question);
+    print "$answer\n";
+    $history .= "Q:$question\nA:$answer\n";
+  }  catch { warn "$_" }
 }

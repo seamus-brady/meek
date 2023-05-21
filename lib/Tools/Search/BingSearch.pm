@@ -34,7 +34,6 @@ use namespace::autoclean;
 use LWP::Simple;
 use JSON;
 use Try::Tiny;
-use MooseX::ClassAttribute;
 use Tools::Search::BingSearchResults;
 use Util::ConfigUtil;
 
@@ -54,12 +53,6 @@ sub BUILD {
   my $self = shift;
   if (!$self->api_key()) {
     $self->api_key($ENV{'BING_SEARCH_KEY'});
-  }
-}
-
-sub search_sub($class, $question) {
-  return sub {
-    Tools::Search::BingSearch->new()->search($question);
   }
 }
 
