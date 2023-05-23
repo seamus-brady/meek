@@ -34,6 +34,7 @@ use LLM::OpenAICompletion;
 use Tools::Search::BingSearch;
 use Tools::Calculator;
 use Util::StringUtil;
+use Util::ConfigUtil;
 
 =head1 NAME
 
@@ -81,14 +82,11 @@ sub query($self, $question){
   # get the tools
   my %tools = tool_config();
 
-  # load the prompt and merge files
+  # load the prompt
   my $script_path = File::Spec->rel2abs(__FILE__);
   my ($volume, $script_directory, $file) = File::Spec->splitpath($script_path);
   my $prompt_file_path = File::Spec->catfile($script_directory, "prompt.txt");
   my $prompt_template = file($prompt_file_path)->slurp;
-  my $merge_file_path = File::Spec->catfile($script_directory, "merge.txt");
-  my $merge_template = file($merge_file_path)->slurp;
-  my $history = "";
 
   # answer the question
   my $answer = $self->_answer_question($question, $prompt_template, %tools);
@@ -101,8 +99,10 @@ sub _answer_question($self, $question, $prompt_template, %tools) {
   $prompt =~ s/\$\{question\}/$question/g;
   $prompt =~ s/\$\{tools\}/join("\n", map {"$_: $tools{$_}->{'description'}"} keys %tools)/e;
 
-  # Allow the model to iterate until a final answer is found
-  while (1) {
+  # Allow the model to iterate until a final answer is found or we go over MAX_ITERATIONS
+  my $i = 0;
+  my $max_iterations = Util::ConfigUtil->get('TOOLFORMER', 'MAX_ITERATIONS');
+  while ($i < $max_iterations) {
     my $response = $self->_complete_prompt($prompt);
 
     # Add the response to the prompt
@@ -119,14 +119,10 @@ sub _answer_question($self, $question, $prompt_template, %tools) {
       my ($finalAnswer) = $response =~ /Final Answer: (.*)/;
       return $finalAnswer;
     }
+    $i++; # increment
   }
-}
-
-sub _merge_history($self, $question, $history, $merge_template) {
-  my $prompt = $merge_template;
-  $prompt =~ s/\$\{question\}/$question/g;
-  $prompt =~ s/\$\{history\}/$history/g;
-  return $self->_complete_prompt($prompt);
+  # no final answer found!
+  return Util::ConfigUtil->get('TOOLFORMER', 'NO_FINAL_ANSWER_ERROR');
 }
 
 sub _complete_prompt($self, $prompt) {
