@@ -63,14 +63,26 @@ sub search($self, $question) {
     my $request_data = $self->_get_request($question);
     my $response = $ua->request($request_data);
     my $search_results = Tools::Search::BingSearchResults->get_json($response->content);
-    print($search_results->webPages->{value}[0]->{snippet});
-    return $search_results->webPages->{value}[0]->{snippet}
+    return $self->_load_snippets($search_results);
   }
   catch {
-    my $e = $_;
-    # say $e;
+    warn "$_";
     return $error_response;
   };
+}
+
+sub _load_snippets($self, $search_results){
+  my $snippet_count = Util::ConfigUtil->get('BING_SEARCH_TOOL', 'NUMBER_SNIPPETS_TO_LOAD');
+  my $snippet_buffer = "";
+  for my $i (0..$snippet_count) {
+    try {
+      my $snippet = $search_results->{webPages}->{value}[$i]->{snippet};
+      if(defined $snippet){
+        $snippet_buffer .= " ".$snippet." ";
+      }
+    } catch { warn "$_" }
+  }
+  return $snippet_buffer;
 }
 
 sub _get_url($self, $term) {
