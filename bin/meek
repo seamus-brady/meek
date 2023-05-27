@@ -23,7 +23,12 @@ no feature qw(indirect);
 # imports
 use Term::ReadLine;
 use Toolformer::Toolformer;
-my $term = Term::ReadLine->new("How can I help?");
-say (Toolformer::Toolformer->new()->query($term));
+while (1) {
+  my $term = Term::ReadLine->new("How can I help?");
+  my $question = $term->readline("How can I help? ");
+  say (Toolformer::Toolformer->new()->query($question));
+}
+
+
 
 
