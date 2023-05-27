@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 # Copyright (c) 2023. seamus@meek.ai, Corvideon Limited.
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
@@ -21,17 +19,14 @@ use open qw(:std :utf8);
 no feature qw(indirect);
 
 # imports
-use Term::ReadLine;
-use Toolformer::Toolformer;
-use Tools::Summariser::Summariser;
+use Test::More;
+use Tools::CurrentDateTime;
 
+subtest 'Tools::CurrentDateTime' => sub {
+  plan tests => 2;
+  my $date_tool =  Tools::CurrentDateTime->new();
+  isa_ok($date_tool, 'Tools::CurrentDateTime', 'Object is an instance of Tools::CurrentDateTime');
+  ok($date_tool->current_time(), 'Tools::CurrentDateTime worked OK');
+};
 
-while (1) {
-  my $term = Term::ReadLine->new("How can I help?");
-  my $question = $term->readline("How can I help? ");
-  say (Toolformer::Toolformer->new()->query($question));
-}
-
-
-
-
+done_testing();

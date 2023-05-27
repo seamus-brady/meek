@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 # Copyright (c) 2023. seamus@meek.ai, Corvideon Limited.
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
@@ -21,17 +19,16 @@ use open qw(:std :utf8);
 no feature qw(indirect);
 
 # imports
-use Term::ReadLine;
-use Toolformer::Toolformer;
-use Tools::Summariser::Summariser;
+use Test::More;
+use Tools::Summariser::Summariser
 
+subtest 'Tools::Summariser::Summariser' => sub {
+  plan tests => 2;
+  my $summariser = Tools::Summariser::Summariser->new();
+  isa_ok($summariser, 'Tools::Summariser::Summariser', 'Object is an instance of Tools::Summariser::Summariser');
+  ok($summariser->summarise(qq(The 40-meter ham band, allocated for amateur radio use,
+  typically refers to the frequency range between 7.000 and 7.200 MHz.
+  This frequency range is measured in megahertz (MHz), not kilohertz (kHz).)), 'Tools::Summariser::Summariser summarised OK');
+};
 
-while (1) {
-  my $term = Term::ReadLine->new("How can I help?");
-  my $question = $term->readline("How can I help? ");
-  say (Toolformer::Toolformer->new()->query($question));
-}
-
-
-
-
+done_testing();

@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 # Copyright (c) 2023. seamus@meek.ai, Corvideon Limited.
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
@@ -21,17 +19,14 @@ use open qw(:std :utf8);
 no feature qw(indirect);
 
 # imports
-use Term::ReadLine;
-use Toolformer::Toolformer;
-use Tools::Summariser::Summariser;
+use Test::More;
+use Tools::Calculator;
 
+  subtest 'Tools::Calculator' => sub {
+    plan tests => 2;
+    my $calc =  Tools::Calculator->new();
+    isa_ok($calc, 'Tools::Calculator', 'Object is an instance of Tools::Calculator');
+    ok($calc->calculate('2 + 2'), 4, 'Tools::Calculator calculated OK');
+  };
 
-while (1) {
-  my $term = Term::ReadLine->new("How can I help?");
-  my $question = $term->readline("How can I help? ");
-  say (Toolformer::Toolformer->new()->query($question));
-}
-
-
-
-
+done_testing();

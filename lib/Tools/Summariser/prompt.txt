@@ -1,0 +1,23 @@
+Please summarise the text input while obeying the following rules:
+Don't waste words.
+Use short, clear, complete sentences.
+Do not use bullet points or dashes.
+Use active voice.
+Maximize detail, meaning.
+Focus on the content.
+
+The phrases are banned:
+this article
+this document
+this page
+this material
+
+
+Summarize:
+Hello how are you?
++++++
+Hello
+
+Summarize this
+${input}
++++++
