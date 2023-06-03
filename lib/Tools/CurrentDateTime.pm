@@ -11,6 +11,7 @@
 #  THE SOFTWARE.
 
 package Tools::CurrentDateTime;
+
 # pragmas
 use strict;
 use Modern::Perl '2023';
@@ -32,12 +33,12 @@ sub current_time($class) {
   try {
     # Get the current date and time with the time zone
     my $dt = DateTime->now( time_zone => 'local');
-    my $formatted_datetime = $dt->strftime('%Y-%m-%d %H:%M:%S %Z');
+    my $formatted_datetime = $dt->strftime('%A %e %B %Y, %H:%M:%S %Z');
     return "Current time with time zone: $formatted_datetime\n";
   }
   catch {
     my $e = $_;
-    say $e;
+    # say $e;
     return $error_response;
   };
 }

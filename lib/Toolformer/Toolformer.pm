@@ -36,6 +36,8 @@ use Tools::Calculator;
 use Util::StringUtil;
 use Util::ConfigUtil;
 use Tools::CurrentDateTime;
+use Tools::WebPageContents;
+use Tools::Summariser::Summariser;
 
 =head1 NAME
 
@@ -81,10 +83,18 @@ sub tool_config {
     },
     'time' => {
       'description' => qq(
-      Gets the current time and date with the time zone. You should always use this for when you need to know the current time, date, month or year.
+      Gets the current time and date with the time zone.
+      You should always use this for when you need to know the current time, date, month or year.
       This tool needs no input.),
       'execute'     => sub {
           return Tools::CurrentDateTime->new()->current_time();
+      },
+    },
+    'webpage_contents' => {
+      'description' => qq(
+      Gets the contents of a web page. The input to this tool must be a valid URL. ),
+      'execute'     => sub {
+        return Tools::WebPageContents->get_web_contents($input);
       },
     }
   );

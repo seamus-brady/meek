@@ -49,7 +49,7 @@ sub summarise($self, $input) {
   }
   catch {
     my $e = $_;
-    say $e;
+    # say $e;
     return $error_response;
   };
 }

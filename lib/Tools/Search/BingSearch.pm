@@ -66,7 +66,7 @@ sub search($self, $question) {
     return $self->_load_snippets($search_results);
   }
   catch {
-    warn "$_";
+    # warn "$_";
     return $error_response;
   };
 }

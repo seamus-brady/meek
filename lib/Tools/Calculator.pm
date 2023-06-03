@@ -35,7 +35,7 @@ sub calculate($class, $input) {
   }
   catch {
     my $e = $_;
-    say $e;
+    # say $e;
     return $error_response;
   };
 }
