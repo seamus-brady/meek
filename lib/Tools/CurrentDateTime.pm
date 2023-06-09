@@ -10,7 +10,7 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #  THE SOFTWARE.
 
-package Tools::Calculator;
+package Tools::CurrentDateTime;
 
 # pragmas
 use strict;
@@ -23,15 +23,18 @@ no feature qw(indirect);
 # imports
 use Moose;
 use MooseX::ClassAttribute;
-use Math::Expression::Evaluator;
+use DateTime;
 use namespace::autoclean;
 use Try::Tiny;
 use Util::ConfigUtil;
 
-sub calculate($class, $input) {
-  my $error_response = Util::ConfigUtil->get('CALC_SEARCH_TOOL', 'PARSE_ERROR_MESSAGE');
+sub current_time($class) {
+  my $error_response = Util::ConfigUtil->get('CURRENT_TIME_TOOL', 'TIME_ERROR_MESSAGE');
   try {
-    return Math::Expression::Evaluator->new()->parse($input)->val();
+    # Get the current date and time with the time zone
+    my $dt = DateTime->now( time_zone => 'local');
+    my $formatted_datetime = $dt->strftime('%A %e %B %Y, %H:%M:%S %Z');
+    return "Current time with time zone: $formatted_datetime\n";
   }
   catch {
     my $e = $_;

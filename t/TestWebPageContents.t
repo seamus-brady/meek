@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 # Copyright (c) 2023. seamus@meek.ai, Corvideon Limited.
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
@@ -21,24 +19,15 @@ use open qw(:std :utf8);
 no feature qw(indirect);
 
 # imports
-use Term::ReadLine;
-use Toolformer::Toolformer;
-use Try::Tiny;
+use Test::More;
+use Tools::WebPageContents;
 
-while (1) {
-  try {
-    my $term = Term::ReadLine->new("How can I help?");
-    my $question = $term->readline("How can I help? ");
-    my $answer1 = Toolformer::Toolformer->new()->query($question);
-    my $answer2 = Toolformer::Toolformer->new()->query($question);
-    my $answer3 = Toolformer::Toolformer->new()->query($question);
-    my $llm = LLM::OpenAICompletion->new();
-    say $llm->completion_response("Please summarise the following statements and say which sounds the most correct answer to the question:\n Question: $question\n (1) $answer1\n (2) $answer2\n (3) $answer3\n ");
-  } catch {
-    # do nothing!
-  }
-}
+subtest 'Tools::WebPageContents' => sub {
+  plan tests => 3;
+  my $web_contents_tool =  Tools::WebPageContents->new();
+  isa_ok($web_contents_tool, 'Tools::WebPageContents', 'Object is an instance of Tools::WebPageContents');
+  ok($web_contents_tool->get_web_contents('https://duckduckgo.com'), 'Tools::WebPageContents worked OK');
+  ok($web_contents_tool->get_web_contents('https://%$£^%$£%$%$'), 'Tools::WebPageContents worked OK with a dodgy URL');
+};
 
-
-
-
+done_testing();

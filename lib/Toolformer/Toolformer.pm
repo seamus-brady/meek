@@ -35,6 +35,9 @@ use Tools::Search::BingSearch;
 use Tools::Calculator;
 use Util::StringUtil;
 use Util::ConfigUtil;
+use Tools::CurrentDateTime;
+use Tools::WebPageContents;
+use Tools::Summariser::Summariser;
 
 =head1 NAME
 
@@ -47,29 +50,53 @@ Toolformer::Toolformer - represents an LLM that that can use predefined tools.
 ##    tool functions and config
 #################################################################
 
-sub searchTool($input) {
-  return Tools::Search::BingSearch->new()->search($input);
-}
-
-sub calcTool($input) {
-  return Tools::Calculator->calculate($input);
-}
 
 sub tool_config {
   my $input = shift;
   my %tools = (
     'search'     => {
       'description' => qq(
-      A search engine. useful for when you need to answer questions about current events.
-      Input should be a search query.'),
-      'execute'     => \&searchTool,
+      A search engine. Useful for when you need to answer questions about current events.
+      Input should be a search query.),
+      'execute'     => sub {
+        $input = shift;
+        return Tools::Search::BingSearch->new()->search($input);
+      },
     },
     'calculator' => {
       'description' => qq(
       Useful for getting the result of a math expression.
       The input to this tool should be a valid mathematical expression that could be executed by a simple calculator.),
-      'execute'     => \&calcTool,
+      'execute'     => sub {
+        $input = shift;
+        return Tools::Calculator->calculate($input);
+      },
     },
+    'summarise' => {
+      'description' => qq(
+      A summarising tool. Useful for when you need to summarise a long piece of text.
+      The input to this tool should be text.),
+      'execute'     => sub {
+          $input = shift;
+          return Tools::Summariser::Summariser->new()->summarise($input);
+      },
+    },
+    'time' => {
+      'description' => qq(
+      Gets the current time and date with the time zone.
+      You should always use this for when you need to know the current time, date, month or year.
+      This tool needs no input.),
+      'execute'     => sub {
+          return Tools::CurrentDateTime->new()->current_time();
+      },
+    },
+    'webpage_contents' => {
+      'description' => qq(
+      Gets the contents of a web page. The input to this tool must be a valid URL. ),
+      'execute'     => sub {
+        return Tools::WebPageContents->get_web_contents($input);
+      },
+    }
   );
   return %tools;
 }

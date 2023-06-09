@@ -11,3 +11,8 @@ requires 'Try::Tiny', '0.31';
 requires 'MooseX-ClassAttribute', '0.29';
 requires 'Config::Tiny', '2.29';
 requires 'Scalar::Util', '1.63';
+requires 'DateTime', '1.59';
+requires 'Zing', '0.27';
+requires 'HTML::Parser', '3.81';
+require 'Mojolicious', '9.32';
+require 'HTML-Formatter', '2.16';
