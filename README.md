@@ -1,8 +1,8 @@
 # Meek
 
-**Meek** is a **prototype** Modern Perl project that explores advanced LLM (Large Language Model) integrations, custom REACT agent loops, dynamic tool use, and other cutting-edge AI techniques.  
-It demonstrates a **Perl implementation of ideas that are typically only implemented in Python**, showing how agent-based LLM techniques can be adapted to Modern Perl.  
-This repository is experimental and intended for research and educational purposes.
+- **Meek** is a **prototype** Modern Perl project that explores advanced LLM (Large Language Model) integrations, custom REACT agent loops, dynamic tool use, and other cutting-edge AI techniques.
+- It demonstrates a **Perl implementation of ideas that are typically only implemented in Python**, showing how agent-based LLM techniques can be adapted to Modern Perl.
+- This repository is experimental and intended for research and educational purposes.
 
 ---
 
@@ -30,15 +30,6 @@ This repository is experimental and intended for research and educational purpos
 - **Tool Use via Custom Toolformer Implementation**
   - Extensible tool integration allows the LLM agent to call external functions, scripts, or APIs as part of its workflow.  
   - Inspired by the [Toolformer: Language Models Can Teach Themselves to Use Tools](https://arxiv.org/abs/2302.04761) paper.  
-
----
-
-## Directory Structure
-
-- `bin/` – Executable scripts and entry points.  
-- `lib/Meek/` – Core Perl modules, including the agent loop, tool interfaces, and utilities.  
-- `tools/` – Example external tools callable by the agent.  
-- `examples/` – Usage examples and test scripts.  
 
 ---
 
